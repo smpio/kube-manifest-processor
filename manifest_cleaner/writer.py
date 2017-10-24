@@ -1,5 +1,6 @@
 import os
 import shutil
+from datetime import datetime
 
 import yaml
 
@@ -13,7 +14,7 @@ class FileWriter:
 
     def write(self, obj):
         self.fp.write('---\n')
-        yaml.safe_dump(obj, default_flow_style=False, stream=self.fp)
+        yaml_dump(obj, self.fp)
 
 
 class DirWriter:
@@ -37,4 +38,20 @@ class DirWriter:
         path = os.path.join(dir_path, name)
 
         with open(path + '.yaml', 'w') as fp:
-            yaml.safe_dump(obj, default_flow_style=False, stream=fp)
+            yaml_dump(obj, fp)
+
+
+def yaml_dump(obj, fp):
+    yaml.dump(obj, stream=fp, Dumper=Dumper, default_flow_style=False)
+
+
+class Dumper(yaml.SafeDumper):
+    pass
+
+
+def _datetime_representer(dumper, data):
+    value = data.isoformat('T') + 'Z'
+    return dumper.represent_scalar('tag:yaml.org,2002:timestamp', value)
+
+
+Dumper.add_representer(datetime, _datetime_representer)
