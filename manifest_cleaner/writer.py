@@ -13,6 +13,7 @@ class FileWriter:
 
     def write(self, obj):
         self.fp.write('---\n')
+        self.fp.flush()
         yaml_dump(obj, self.fp)
 
 
