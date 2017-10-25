@@ -34,7 +34,11 @@ def read_file(spec):
         fp = spec
     else:
         fp = open(spec, 'r')
-    return yaml.load_all(fp, Loader=Loader)
+    return exclude_empty_documents(yaml.load_all(fp, Loader=Loader))
+
+
+def exclude_empty_documents(docs):
+    return (doc for doc in docs if doc is not None)
 
 
 def reraise(err):
