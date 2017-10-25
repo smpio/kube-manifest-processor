@@ -2,7 +2,6 @@ import os
 import json
 import shutil
 import subprocess
-from datetime import date, datetime
 
 
 class FileWriter:
@@ -43,11 +42,4 @@ class DirWriter:
 
 def yaml_dump(obj, fp):
     with subprocess.Popen(['kube-yaml-cleaner'], stdin=subprocess.PIPE, stdout=fp, encoding='utf-8') as proc:
-        json.dump(obj, proc.stdin, default=serialize_json)
-
-
-def serialize_json(obj):
-    if isinstance(obj, (datetime, date)):
-        return obj.isoformat() + 'Z'
-
-    raise TypeError
+        json.dump(obj, proc.stdin)

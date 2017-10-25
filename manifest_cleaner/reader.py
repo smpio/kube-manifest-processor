@@ -34,8 +34,15 @@ def read_file(spec):
         fp = spec
     else:
         fp = open(spec, 'r')
-    return yaml.safe_load_all(fp)
+    return yaml.load_all(fp, Loader=Loader)
 
 
 def reraise(err):
     raise err
+
+
+class Loader(yaml.SafeLoader):
+    pass
+
+
+Loader.yaml_constructors['tag:yaml.org,2002:timestamp'] = Loader.yaml_constructors['tag:yaml.org,2002:str']
