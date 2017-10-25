@@ -13,6 +13,7 @@ class Cleaner:
             label_maps = [
                 metadata.get('labels'),
                 obj.get('spec', {}).get('template', {}).get('metadata', {}).get('labels'),
+                obj.get('spec', {}).get('selector', {}),
             ]
 
             for labels in label_maps:
