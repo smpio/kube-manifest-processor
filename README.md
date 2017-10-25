@@ -5,4 +5,10 @@ Cleans and structures your Kubernetes manifest files
 
 ## Installation
 
-First install [kube-yaml-cleaner](https://github.com/smpio/kube-yaml-cleaner) to your `PATH`.
+1. Install [kube-yaml-cleaner](https://github.com/smpio/kube-yaml-cleaner) to your `PATH`.
+2. Clone the repo and run `pip install .`.
+
+
+## Usage
+
+See `kube-manifest-cleaner --help`.
