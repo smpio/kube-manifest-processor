@@ -1,8 +1,8 @@
 import os
+import json
 import shutil
-from datetime import datetime
-
-import yaml
+import subprocess
+from datetime import date, datetime
 
 
 class FileWriter:
@@ -42,16 +42,12 @@ class DirWriter:
 
 
 def yaml_dump(obj, fp):
-    yaml.dump(obj, stream=fp, Dumper=Dumper, default_flow_style=False)
+    with subprocess.Popen(['kube-yaml-cleaner'], stdin=subprocess.PIPE, stdout=fp, encoding='utf-8') as proc:
+        json.dump(obj, proc.stdin, default=serialize_json)
 
 
-class Dumper(yaml.SafeDumper):
-    pass
+def serialize_json(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat() + 'Z'
 
-
-def _datetime_representer(dumper, data):
-    value = data.isoformat('T') + 'Z'
-    return dumper.represent_scalar('tag:yaml.org,2002:timestamp', value)
-
-
-Dumper.add_representer(datetime, _datetime_representer)
+    raise TypeError
