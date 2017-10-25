@@ -2,35 +2,43 @@ package main
 
 import (
     "os"
-    "fmt"
-    //"flag"
+    "log"
+    "flag"
     "io/ioutil"
 
-    //"github.com/golang/glog"
     "github.com/ghodss/yaml"
 )
 
 func main() {
-    //flag.Parse()
+    outDir := flag.String("dir", "", "output directory")
+    flag.Parse()
     //glog.Info("Prepare to repel boarders")
+
+    if *outDir == "" {
+        log.Fatalln("No out dir")
+        return
+    }
+
+    os.RemoveAll(*outDir)
 
     data, err := ioutil.ReadAll(os.Stdin)
     if err != nil {
-        fmt.Printf("Error reading stdin: %v\n", err)
+        log.Fatalf("Error reading stdin: %v\n", err)
         return
     }
 
     var obj interface{}
     err = yaml.Unmarshal(data, &obj)
     if err != nil {
-        fmt.Printf("Error parsing YAML: %v\n", err)
+        log.Fatalf("Error parsing YAML: %v\n", err)
         return
     }
 
     data, err = yaml.Marshal(obj)
     if err != nil {
-        fmt.Printf("Error formatting YAML: %v\n", err)
+        log.Fatalf("Error formatting YAML: %v\n", err)
         return
     }
+
     os.Stdout.Write(data)
 }
