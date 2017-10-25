@@ -13,6 +13,7 @@ def main():
     arg_parser.add_argument('-o', '--output', help='ouput file (default stdout)')
     arg_parser.add_argument('-d', '--output-dir', help='output directory')
     arg_parser.add_argument('--remove-namespace', action='store_true', help='remove namespace from objects')
+    arg_parser.add_argument('--remove-tiller-labels', action='store_true', help='remove helm tiller labels')
     arg_parser.add_argument('--log-level', default='WARNING')
     args = arg_parser.parse_args()
 
@@ -28,6 +29,7 @@ def main():
 
     cleaner = Cleaner()
     cleaner.remove_namespace = args.remove_namespace
+    cleaner.remove_tiller_labels = args.remove_tiller_labels
 
     if args.output:
         writer = FileWriter(args.output)
