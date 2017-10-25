@@ -3,11 +3,11 @@ import os
 import yaml
 
 
-def get_path_reader(path):
-    if os.path.isdir(path):
-        return DirReader(path)
+def get_reader(spec):
+    if hasattr(spec, 'read') or not os.path.isdir(spec):
+        return FileReader(spec)
     else:
-        return FileReader(path)
+        return DirReader(spec)
 
 
 class DirReader:
