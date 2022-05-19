@@ -1,6 +1,6 @@
 import os
 
-import yaml
+from .yaml import yaml
 
 
 def get_reader(spec):
@@ -34,7 +34,7 @@ def read_file(spec):
         fp = spec
     else:
         fp = open(spec, 'r')
-    return exclude_empty_documents(yaml.load_all(fp, Loader=Loader))
+    return exclude_empty_documents(yaml.load_all(fp))
 
 
 def exclude_empty_documents(docs):
@@ -43,10 +43,3 @@ def exclude_empty_documents(docs):
 
 def reraise(err):
     raise err
-
-
-class Loader(yaml.SafeLoader):
-    pass
-
-
-Loader.yaml_constructors['tag:yaml.org,2002:timestamp'] = Loader.yaml_constructors['tag:yaml.org,2002:str']

@@ -6,5 +6,5 @@ setup(
     entry_points={'console_scripts': [
         'kube-manifest-cleaner = manifest_cleaner.__main__:main',
     ]},
-    install_requires=['PyYAML'],
+    install_requires=['ruamel.yaml'],
 )

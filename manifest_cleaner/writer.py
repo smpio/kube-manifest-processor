@@ -1,7 +1,7 @@
 import os
-import json
 import shutil
-import subprocess
+
+from .yaml import yaml
 
 
 class FileWriter:
@@ -24,15 +24,21 @@ class DirWriter:
         shutil.rmtree(self.root, ignore_errors=True)
 
     def write(self, obj):
+        group_version = obj['apiVersion']
+        if group_version == 'v1':
+            subpath = '_core'
+        else:
+            subpath, _ = group_version.split('/', maxsplit=1)
+
         kind = obj['kind']
         metadata = obj['metadata']
         name = metadata['name']
         namespace = metadata.get('namespace') or '_'
 
         if self.include_namespace:
-            dir_path = os.path.join(self.root, namespace, kind)
+            dir_path = os.path.join(self.root, namespace, subpath, kind)
         else:
-            dir_path = os.path.join(self.root, kind)
+            dir_path = os.path.join(self.root, subpath, kind)
 
         os.makedirs(dir_path, exist_ok=True)
         path = os.path.join(dir_path, name)
@@ -42,5 +48,4 @@ class DirWriter:
 
 
 def yaml_dump(obj, fp):
-    with subprocess.Popen(['kube-yaml-cleaner'], stdin=subprocess.PIPE, stdout=fp, encoding='utf-8') as proc:
-        json.dump(obj, proc.stdin)
+    yaml.dump(obj, fp)
