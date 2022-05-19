@@ -1,11 +1,15 @@
+import io
 import os
 
 from .yaml import yaml
 
 
 def get_reader(spec):
-    if hasattr(spec, 'read') or not os.path.isdir(spec):
-        return FileReader(spec)
+    if isinstance(spec, io.IOBase):
+        return StreamReader(spec)
+    elif not os.path.isdir(spec):
+        with open(spec, 'r') as fp:
+            return StreamReader(fp)
     else:
         return DirReader(spec)
 
@@ -18,22 +22,19 @@ class DirReader:
         for root, dirs, files in os.walk(self.root, followlinks=True, onerror=reraise):
             for file in files:
                 path = os.path.join(root, file)
-                yield from read_file(path)
+                with open(path, 'r') as fp:
+                    yield from read_fp(fp)
 
 
-class FileReader:
+class StreamReader:
     def __init__(self, spec):
         self.spec = spec
 
     def __iter__(self):
-        yield from read_file(self.spec)
+        return read_fp(self.spec)
 
 
-def read_file(spec):
-    if hasattr(spec, 'read'):
-        fp = spec
-    else:
-        fp = open(spec, 'r')
+def read_fp(fp):
     return exclude_empty_documents(yaml.load_all(fp))
 
 
