@@ -25,15 +25,11 @@ def main():
     arg_parser.add_argument('--remove-namespace', action='store_true', help='remove namespace from objects')
     arg_parser.add_argument('--remove-tiller-labels', action='store_true', help='remove helm tiller labels')
     arg_parser.add_argument('--log-level', default='WARNING')
-    arg_parser.add_argument('inputs', metavar='INPUT', nargs='*', help='file or directory name')
+    arg_parser.add_argument('inputs', metavar='INPUT', nargs='+', help='file or directory name')
     arg_parser.add_argument('output', metavar='OUTPUT', help='see below for formats')
     args = arg_parser.parse_args()
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=args.log_level)
-
-    inputs = args.inputs
-    if not inputs:
-        inputs = [sys.stdin]
 
     cleaner = Cleaner()
     cleaner.remove_namespace = args.remove_namespace
@@ -44,7 +40,7 @@ def main():
     except Exception:
         return arg_parser.error('Invalid OUTPUT format')
 
-    for input in inputs:
+    for input in args.inputs:
         reader = get_reader(input)
         for obj in reader:
             obj = cleaner.process(obj)
