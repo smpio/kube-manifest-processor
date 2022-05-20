@@ -1,1 +1,2 @@
 registry = {}
+from . import simple

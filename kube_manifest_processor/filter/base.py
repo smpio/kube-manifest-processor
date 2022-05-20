@@ -7,12 +7,5 @@ class Filter:
         if name is not None:
             registry[name] = cls
 
-
-class ObjectFilter(Filter):
     def process(self, obj):
-        raise NotImplementedError
-
-
-class TextFilter(Filter):
-    def process(self, text):
         raise NotImplementedError
