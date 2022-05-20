@@ -18,27 +18,28 @@ class FileWriter:
 
 
 class DirWriter:
-    def __init__(self, path):
+    def __init__(self, path, by_namespace=True, by_api_group_kind=True):
         self.root = path
-        self.include_namespace = False
+        self.by_namespace = by_namespace
+        self.by_api_group_kind = by_api_group_kind
         shutil.rmtree(self.root, ignore_errors=True)
 
     def write(self, obj):
-        group_version = obj['apiVersion']
-        if group_version == 'v1':
-            subpath = '_core'
-        else:
-            subpath, _ = group_version.split('/', maxsplit=1)
-
-        kind = obj['kind']
         metadata = obj['metadata']
         name = metadata['name']
-        namespace = metadata.get('namespace') or '_'
 
-        if self.include_namespace:
-            dir_path = os.path.join(self.root, namespace, subpath, kind)
-        else:
-            dir_path = os.path.join(self.root, subpath, kind)
+        dir_path = self.root
+
+        if self.by_namespace:
+            dir_path = os.path.join(dir_path, metadata.get('namespace') or '_')
+
+        if self.by_api_group_kind:
+            group_version = obj['apiVersion']
+            if group_version == 'v1':
+                api_group = '_core'
+            else:
+                api_group, _ = group_version.split('/', maxsplit=1)
+            dir_path = os.path.join(dir_path, api_group, obj['kind'])
 
         os.makedirs(dir_path, exist_ok=True)
         path = os.path.join(dir_path, name)
