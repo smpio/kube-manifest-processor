@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from .yaml import yaml
+from .yaml import YAML
 
 
 class FileWriter:
@@ -46,4 +46,4 @@ class DirWriter:
 
 
 def yaml_dump(obj, fp):
-    yaml.dump(obj, fp)
+    YAML().dump(obj, fp)
