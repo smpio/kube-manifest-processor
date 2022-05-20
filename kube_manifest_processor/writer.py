@@ -6,10 +6,7 @@ from .yaml import yaml
 
 class FileWriter:
     def __init__(self, spec):
-        if hasattr(spec, 'write'):
-            self.fp = spec
-        else:
-            self.fp = open(spec, 'w')
+        self.fp = open(spec, 'w')
 
     def write(self, obj):
         self.fp.write('---\n')
