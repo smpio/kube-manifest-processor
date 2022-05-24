@@ -44,7 +44,7 @@ class External(Filter, name='external'):
         else:
             raise Exception(f'Invalid format: {self.format}')
 
-        result = subprocess.run([self.command], input=marshalled, capture_output=True, check=True)
+        result = subprocess.run(self.command, shell=True, input=marshalled, capture_output=True, check=True)
         return YAML().load(result.stdout)
 
 
