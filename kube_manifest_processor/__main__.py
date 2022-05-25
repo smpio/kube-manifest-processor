@@ -3,6 +3,7 @@ import argparse
 
 from .yaml import YAML
 from .reader import get_reader
+from .models import decorate_object
 from .writer import FileWriter, DirWriter
 from .filter import registry as filters_registry
 
@@ -24,6 +25,7 @@ output_types = {
     'dir': DirWriter,
 }
 
+
 def main():
     arg_parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, epilog=epilog)
     arg_parser.add_argument('--remove-namespace', action='store_true', help='remove namespace from objects')
@@ -42,16 +44,17 @@ def main():
         return arg_parser.error('Invalid OUTPUT format')
 
     if args.filter:
-        try:
-            filters = [parse_smart_arg(f, filters_registry) for f in args.filter]
-        except Exception:
-            return arg_parser.error('Invalid FILTER format')
+        # try:
+        filters = [parse_smart_arg(f, filters_registry) for f in args.filter]
+        # except Exception:
+        #     return arg_parser.error('Invalid FILTER format')
     else:
         filters = []
 
     for input in args.inputs:
         reader = get_reader(input)
         for obj in reader:
+            decorate_object(obj)
             for f in filters:
                 obj = f.process(obj)
             writer.write(obj)

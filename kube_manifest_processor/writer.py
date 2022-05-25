@@ -31,12 +31,7 @@ class DirWriter:
             dir_path = os.path.join(dir_path, metadata.get('namespace') or '_')
 
         if self.by_api_group_kind:
-            group_version = obj['apiVersion']
-            if group_version == 'v1':
-                api_group = '_core'
-            else:
-                api_group, _ = group_version.split('/', maxsplit=1)
-            dir_path = os.path.join(dir_path, api_group, obj['kind'])
+            dir_path = os.path.join(dir_path, obj._gvk.group or '_core', obj['kind'])
 
         os.makedirs(dir_path, exist_ok=True)
         path = os.path.join(dir_path, name)

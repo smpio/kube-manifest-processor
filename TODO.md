@@ -7,7 +7,6 @@
 * url (for convinience)
 
 # filters
-* native clean (from kube.js)
 * remove ServiceAccount tokens (kind == 'Secret' and type == 'kubernetes.io/service-account-token')
 * remove default ServiceAccount (kind == 'ServiceAccount' and name == 'default')
 * remove kind == 'ConfigMap' and name == 'kube-root-ca.crt'
