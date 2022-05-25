@@ -31,7 +31,7 @@ def main():
     arg_parser.add_argument('--remove-namespace', action='store_true', help='remove namespace from objects')
     arg_parser.add_argument('--remove-tiller-labels', action='store_true', help='remove helm tiller labels')
     arg_parser.add_argument('--log-level', default='WARNING')
-    arg_parser.add_argument('-f', '--filter', metavar='FILTER', nargs='*', help='see below for formats')
+    arg_parser.add_argument('-f', '--filter', action='append', default=[], help='see below for formats')
     arg_parser.add_argument('inputs', metavar='INPUT', nargs='+', help='file or directory name')
     arg_parser.add_argument('output', metavar='OUTPUT', help='see below for formats')
     args = arg_parser.parse_args()
@@ -43,21 +43,23 @@ def main():
     except Exception:
         return arg_parser.error('Invalid OUTPUT format')
 
-    if args.filter:
-        # try:
-        filters = [parse_smart_arg(f, filters_registry) for f in args.filter]
-        # except Exception:
-        #     return arg_parser.error('Invalid FILTER format')
-    else:
-        filters = []
+    # try:
+    filters = [parse_smart_arg(f, filters_registry) for f in args.filter]
+    # except Exception:
+    #     return arg_parser.error('Invalid FILTER format')
+
+    def process_object(obj):
+        decorate_object(obj)
+        for f in filters:
+            obj = f.process(obj)
+            if obj is None:
+                return
+        writer.write(obj)
 
     for input in args.inputs:
         reader = get_reader(input)
         for obj in reader:
-            decorate_object(obj)
-            for f in filters:
-                obj = f.process(obj)
-            writer.write(obj)
+            process_object(obj)
 
 
 def parse_smart_arg(arg, class_map, default_class=None):
