@@ -5,6 +5,7 @@ import collections
 
 from .base import Filter
 from ..yaml import YAML
+from ..models import GroupVersionKind
 
 
 class RemoveNamespace(Filter, name='remove_namespace'):
@@ -62,4 +63,31 @@ class RemovePrefix(Filter, name='remove_prefix'):
         elif isinstance(obj, list):
             for v in obj:
                 self.process(v)
+        return obj
+
+
+class DropServiceAccountTokens(Filter, name='drop_sa_tokens'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'Secret'):
+            return obj
+        if obj.get('type') == 'kubernetes.io/service-account-token':
+            return None
+        return obj
+
+
+class DropDefaultServiceAccount(Filter, name='drop_default_sa'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'ServiceAccount'):
+            return obj
+        if obj.get('metadata', {}).get('name') == 'default':
+            return None
+        return obj
+
+
+class DropKubeRootCA(Filter, name='drop_kube_root_ca'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'ConfigMap'):
+            return obj
+        if obj.get('metadata', {}).get('name') == 'kube-root-ca.crt':
+            return None
         return obj
