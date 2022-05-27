@@ -99,3 +99,4 @@ class CleanPVC(Filter, name='clean_pvc'):
         anns.pop('volume.kubernetes.io/storage-resizer', None)
         spec = obj.get('spec', {})
         spec.pop('volumeName', None)
+        return obj
