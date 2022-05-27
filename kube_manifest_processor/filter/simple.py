@@ -5,7 +5,6 @@ import collections
 
 from .base import Filter
 from ..yaml import YAML
-from ..models import GroupVersionKind
 
 
 class RemoveNamespace(Filter, name='remove_namespace'):
@@ -63,65 +62,6 @@ class RemovePrefix(Filter, name='remove_prefix'):
         elif isinstance(obj, list):
             for v in obj:
                 self.process(v)
-        return obj
-
-
-class DropServiceAccountTokens(Filter, name='drop_sa_tokens'):
-    def process(self, obj):
-        if obj._gvk != GroupVersionKind('', 'v1', 'Secret'):
-            return obj
-        if obj.get('type') == 'kubernetes.io/service-account-token':
-            return None
-        return obj
-
-
-class DropDefaultServiceAccount(Filter, name='drop_default_sa'):
-    def process(self, obj):
-        if obj._gvk != GroupVersionKind('', 'v1', 'ServiceAccount'):
-            return obj
-        if obj.get('metadata', {}).get('name') == 'default':
-            return None
-        return obj
-
-
-class DropKubeRootCA(Filter, name='drop_kube_root_ca'):
-    def process(self, obj):
-        if obj._gvk != GroupVersionKind('', 'v1', 'ConfigMap'):
-            return obj
-        if obj.get('metadata', {}).get('name') == 'kube-root-ca.crt':
-            return None
-        return obj
-
-
-class DropSnapshots(Filter, name='drop_snapshots'):
-    def process(self, obj):
-        if obj._gvk.group == 'snapshot.storage.k8s.io' and obj._gvk.kind == 'VolumeSnapshot':
-            return None
-        return obj
-
-
-class DropTLSSecrets(Filter, name='drop_tls_secrets'):
-    def process(self, obj):
-        if obj._gvk != GroupVersionKind('', 'v1', 'Secret'):
-            return obj
-        if obj.get('type') == 'kubernetes.io/tls':
-            return None
-        return obj
-
-
-class DropDefaultNetworkPolicy(Filter, name='drop_default_network_policy'):
-    def process(self, obj):
-        if obj._gvk.group == 'networking.k8s.io' and obj._gvk.kind == 'NetworkPolicy':
-            if obj.get('metadata', {}).get('name') == 'default':
-                return None
-        return obj
-
-
-class DropAdminsRBAC(Filter, name='drop_admins_rbac'):
-    def process(self, obj):
-        if obj._gvk.group == 'rbac.authorization.k8s.io' and obj._gvk.kind == 'RoleBinding':
-            if obj.get('metadata', {}).get('name') == 'admins':
-                return None
         return obj
 
 
