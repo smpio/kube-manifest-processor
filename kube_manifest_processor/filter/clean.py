@@ -80,6 +80,7 @@ def clean_annotations(anns):
     anns.pop('cni.projectcalico.org/podIPs', None)
     anns.pop('kubernetes.io/psp', None)
     anns.pop('kubectl.kubernetes.io/last-applied-configuration', None)
+    anns.pop('deployment.kubernetes.io/revision', None)
 
 
 def decorate_schema(schema):
