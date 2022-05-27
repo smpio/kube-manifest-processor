@@ -100,3 +100,13 @@ class CleanPVC(Filter, name='clean_pvc'):
         spec = obj.get('spec', {})
         spec.pop('volumeName', None)
         return obj
+
+
+class CleanService(Filter, name='clean_service'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'Service'):
+            return obj
+        spec = obj.get('spec', {})
+        spec.pop('clusterIP', None)
+        spec.pop('clusterIPs', None)
+        return obj
