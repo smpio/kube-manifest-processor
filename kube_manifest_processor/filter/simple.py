@@ -115,3 +115,11 @@ class DropDefaultNetworkPolicy(Filter, name='drop_default_network_policy'):
             if obj.get('metadata', {}).get('name') == 'default':
                 return None
         return obj
+
+
+class DropAdminsRBAC(Filter, name='drop_admins_rbac'):
+    def process(self, obj):
+        if obj._gvk.group == 'rbac.authorization.k8s.io' and obj._gvk.kind == 'RoleBinding':
+            if obj.get('metadata', {}).get('name') == 'admins':
+                return None
+        return obj
