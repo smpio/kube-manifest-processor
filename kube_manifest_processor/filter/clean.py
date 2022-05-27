@@ -13,7 +13,7 @@ ref_prefix = '#/definitions/'
 
 
 class Clean(Filter, name='clean'):
-    def __init__(self, openapi_schema):
+    def __init__(self, openapi_schema, *, drop_labels='', drop_annotations=''):
         # kubectl get --raw /openapi/v2
         with open(openapi_schema, 'rb') as fp:
             self.schema = decorate_schema(json.load(fp))
@@ -24,6 +24,21 @@ class Clean(Filter, name='clean'):
             for gvk_dict in gvks:
                 gvk = GroupVersionKind(**gvk_dict)
                 self.gvk_map[gvk] = d
+
+        self.drop_labels = drop_labels.split(',') + [
+            'controller-uid',
+            'job-name',
+            'pod-template-hash',
+        ]
+
+        self.drop_annotations = drop_annotations.split(',') + [
+            'cni.projectcalico.org/containerID',
+            'cni.projectcalico.org/podIP',
+            'cni.projectcalico.org/podIPs',
+            'kubernetes.io/psp',
+            'kubectl.kubernetes.io/last-applied-configuration',
+            'deployment.kubernetes.io/revision',
+        ]
 
     def process(self, obj):
         d = self.gvk_map.get(obj._gvk)
@@ -38,12 +53,12 @@ class Clean(Filter, name='clean'):
             ref = d['$ref']
             if ref == 'io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta':
                 if 'labels' in obj:
-                    clean_labels(obj['labels'])
+                    self.clean_labels(obj['labels'])
                 if 'annotations' in obj:
-                    clean_annotations(obj['annotations'])
+                    self.clean_annotations(obj['annotations'])
             if ref == 'io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector':
                 if 'matchLabels' in obj:
-                    clean_labels(obj['matchLabels'])
+                    self.clean_labels(obj['matchLabels'])
             d = self.schema['definitions'].get(ref)
             if not d:
                 return
@@ -67,20 +82,13 @@ class Clean(Filter, name='clean'):
                 if v == {} and k not in d.get('required', ()):
                     del obj[k]
 
+    def clean_labels(self, labels):
+        for label in self.drop_labels:
+            labels.pop(label, None)
 
-def clean_labels(labels):
-    labels.pop('controller-uid', None)
-    labels.pop('job-name', None)
-    labels.pop('pod-template-hash', None)
-
-
-def clean_annotations(anns):
-    anns.pop('cni.projectcalico.org/containerID', None)
-    anns.pop('cni.projectcalico.org/podIP', None)
-    anns.pop('cni.projectcalico.org/podIPs', None)
-    anns.pop('kubernetes.io/psp', None)
-    anns.pop('kubectl.kubernetes.io/last-applied-configuration', None)
-    anns.pop('deployment.kubernetes.io/revision', None)
+    def clean_annotations(self, annotations):
+        for annotation in self.drop_annotations:
+            annotations.pop(annotation, None)
 
 
 def decorate_schema(schema):
