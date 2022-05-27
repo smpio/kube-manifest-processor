@@ -91,3 +91,27 @@ class DropKubeRootCA(Filter, name='drop_kube_root_ca'):
         if obj.get('metadata', {}).get('name') == 'kube-root-ca.crt':
             return None
         return obj
+
+
+class DropSnapshots(Filter, name='drop_snapshots'):
+    def process(self, obj):
+        if obj._gvk.group == 'snapshot.storage.k8s.io' and obj._gvk.kind == 'VolumeSnapshot':
+            return None
+        return obj
+
+
+class DropTLSSecrets(Filter, name='drop_tls_secrets'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'Secret'):
+            return obj
+        if obj.get('type') == 'kubernetes.io/tls':
+            return None
+        return obj
+
+
+class DropDefaultNetworkPolicy(Filter, name='drop_default_network_policy'):
+    def process(self, obj):
+        if obj._gvk.group == 'networking.k8s.io' and obj._gvk.kind == 'NetworkPolicy':
+            if obj.get('metadata', {}).get('name') == 'default':
+                return None
+        return obj
