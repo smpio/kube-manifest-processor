@@ -126,23 +126,21 @@ class DropAdminsRBAC(Filter, name='drop_admins_rbac'):
 
 
 class Drop(Filter, name='drop'):
-    def __init__(self, *, group=None, version=None, kind=None, name=None):
-        self.group = group
-        self.version = version
-        self.kind = kind
-        self.name = name
+    def __init__(self, group_kind, **filters):
+        self.group, self.kind = group_kind.split('/')
+        self.filters = {tuple(k.split('/')): YAML().load(v) for k, v in filters.items()}
 
     def process(self, obj):
-        if self.group is not None:
-            if self.group != obj._gvk.group:
-                return obj
-        if self.version is not None:
-            if self.version != obj._gvk.version:
-                return obj
-        if self.kind is not None:
-            if self.kind != obj._gvk.kind:
-                return obj
-        if self.name is not None:
-            if self.name != obj.get('metadata', {}).get('name'):
+        if self.group != obj._gvk.group:
+            return obj
+        if self.kind != obj._gvk.kind:
+            return obj
+        for k, v in self.filters.items():
+            subdata = obj
+            for kpart in k:
+                if subdata is None:
+                    return obj
+                subdata = subdata.get(kpart)
+            if subdata != v:
                 return obj
         return None
