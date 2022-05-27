@@ -64,7 +64,7 @@ class Clean(Filter, name='clean'):
                     del obj[k]
                     continue
                 self._clean(v, subdef)
-                if v == {}:
+                if v == {} and k not in d.get('required', ()):
                     del obj[k]
 
 
