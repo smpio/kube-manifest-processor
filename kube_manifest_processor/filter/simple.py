@@ -123,3 +123,26 @@ class DropAdminsRBAC(Filter, name='drop_admins_rbac'):
             if obj.get('metadata', {}).get('name') == 'admins':
                 return None
         return obj
+
+
+class Drop(Filter, name='drop'):
+    def __init__(self, *, group=None, version=None, kind=None, name=None):
+        self.group = group
+        self.version = version
+        self.kind = kind
+        self.name = name
+
+    def process(self, obj):
+        if self.group is not None:
+            if self.group != obj._gvk.group:
+                return obj
+        if self.version is not None:
+            if self.version != obj._gvk.version:
+                return obj
+        if self.kind is not None:
+            if self.kind != obj._gvk.kind:
+                return obj
+        if self.name is not None:
+            if self.name != obj.get('metadata', {}).get('name'):
+                return obj
+        return None

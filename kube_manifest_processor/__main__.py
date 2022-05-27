@@ -68,7 +68,7 @@ def parse_smart_arg(arg, class_map, default_class=None):
         return default_class(parts[0])
     class_name = parts[0]
     klass = class_map[class_name]
-    if len(parts) > 1:
+    if len(parts) > 1 and parts[1]:
         args = (parts[1],)
     else:
         args = ()
