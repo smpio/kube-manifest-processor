@@ -4,6 +4,7 @@ import subprocess
 import collections
 
 from .base import Filter
+from ..models import GroupVersionKind
 from ..yaml import YAML
 
 
@@ -84,3 +85,17 @@ class Drop(Filter, name='drop'):
             if subdata != v:
                 return obj
         return None
+
+
+class CleanPVC(Filter, name='clean_pvc'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'PersistentVolumeClaim'):
+            return obj
+        anns = obj.get('metadata', {}).get('annotations', {})
+        anns.pop('pv.kubernetes.io/bind-completed', None)
+        anns.pop('pv.kubernetes.io/bound-by-controller', None)
+        anns.pop('volume.beta.kubernetes.io/storage-provisioner', None)
+        anns.pop('volume.kubernetes.io/selected-node', None)
+        anns.pop('volume.kubernetes.io/storage-resizer', None)
+        spec = obj.get('spec', {})
+        spec.pop('volumeName', None)
