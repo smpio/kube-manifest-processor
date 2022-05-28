@@ -6,5 +6,8 @@ setup(
     entry_points={'console_scripts': [
         'kube-manifest-processor = kube_manifest_processor.__main__:main',
     ]},
-    install_requires=['ruamel.yaml'],
+    install_requires=[
+        'ruamel.yaml',
+        'requests',
+    ],
 )
