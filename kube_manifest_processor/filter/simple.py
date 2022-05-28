@@ -110,3 +110,10 @@ class CleanService(Filter, name='clean_service'):
         spec.pop('clusterIP', None)
         spec.pop('clusterIPs', None)
         return obj
+
+
+class DropOwned(Filter, name='drop_owned'):
+    def process(self, obj):
+        if 'ownerReferences' in obj.get('metadata', {}):
+            return None
+        return obj
