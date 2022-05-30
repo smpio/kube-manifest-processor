@@ -49,6 +49,9 @@ class Clean(Filter, name='clean'):
         return obj
 
     def _clean(self, obj, d):
+        if 'default' in d and obj == d['default']:
+            raise _Drop()
+
         if '$ref' in d:
             ref = d['$ref']
             if ref == 'io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta':
@@ -62,6 +65,8 @@ class Clean(Filter, name='clean'):
             d = self.schema['definitions'].get(ref)
             if not d:
                 return
+            if 'default' in d and obj == d['default']:
+                raise _Drop()
 
         if isinstance(obj, list) and 'items' in d:
             for item in obj:
@@ -72,14 +77,13 @@ class Clean(Filter, name='clean'):
                 subdef = d['properties'].get(k)
                 if not subdef:
                     continue
-                if subdef['read_only']:
-                    del obj[k]
-                    continue
-                if 'default' in subdef and v == subdef['default']:
-                    del obj[k]
-                    continue
-                self._clean(v, subdef)
-                if v == {} and k not in d.get('required', ()):
+                try:
+                    if subdef['read_only']:
+                        raise _Drop()
+                    self._clean(v, subdef)
+                    if v == {} and k not in d.get('required', ()):
+                        raise _Drop()
+                except _Drop:
                     del obj[k]
 
     def clean_labels(self, labels):
@@ -169,3 +173,7 @@ def decorate_definition(d):
                             del d['default']
                 elif d['type'] == 'number':
                     d['default'] = float(d['default'])
+
+
+class _Drop(Exception):
+    pass
