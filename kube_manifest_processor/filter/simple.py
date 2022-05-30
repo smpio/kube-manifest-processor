@@ -30,6 +30,13 @@ class RemoveTillerLabels(Filter, name='remove_tiller_labels'):
         return obj
 
 
+class RemoveServiceAccountSecrets(Filter, name='remove_sa_secrets'):
+    def process(self, obj):
+        if obj._gvk != GroupVersionKind('', 'v1', 'ServiceAccount'):
+            return obj
+        obj.pop('secrets', None)
+
+
 class External(Filter, name='external'):
     def __init__(self, command, format='yaml'):
         self.command = command
