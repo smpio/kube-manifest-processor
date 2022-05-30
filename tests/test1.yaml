@@ -1,0 +1,18 @@
+key-order:
+  b: x
+  c: x
+  a: x
+quoted-string: 'True'
+a-list:
+- 3
+- 2
+- 1
+multi-line-string: |
+  line 1
+  line 2
+string-with-spaces: hello world
+multi-line-2: |-
+  line 1
+  no ending newline
+a-null: null
+a-bool: true
