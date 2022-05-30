@@ -1,6 +1,7 @@
 import io
 
 import ruamel.yaml
+import ruamel.yaml.scalarstring
 
 # see https://github.com/kubernetes/kubernetes/issues/34146#issuecomment-680825790
 
@@ -13,6 +14,8 @@ class YAML(ruamel.yaml.YAML):
     def __init__(self):
         super().__init__()
         self.representer.add_representer(type(None), my_represent_none)
+        self.default_style = None
+        self.default_flow_style = False
 
 
 def load(stream):
@@ -24,10 +27,15 @@ def load_all(stream):
 
 
 def dump(obj, fp):
+    """WARNING: can mutate obj"""
+
+    ruamel.yaml.scalarstring.walk_tree(obj)
     YAML().dump(obj, fp)
 
 
 def dumps(obj, bytes=False):
+    """WARNING: can mutate obj"""
+
     if bytes:
         out = io.BytesIO()
     else:
