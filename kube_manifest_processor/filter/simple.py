@@ -35,6 +35,7 @@ class RemoveServiceAccountSecrets(Filter, name='remove_sa_secrets'):
         if obj._gvk != GroupVersionKind('', 'v1', 'ServiceAccount'):
             return obj
         obj.pop('secrets', None)
+        return obj
 
 
 class External(Filter, name='external'):
