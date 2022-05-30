@@ -13,9 +13,19 @@ def my_represent_none(self, data):
 class YAML(ruamel.yaml.YAML):
     def __init__(self):
         super().__init__()
-        self.representer.add_representer(type(None), my_represent_none)
         self.default_style = None
         self.default_flow_style = False
+
+        self.representer.add_representer(type(None), my_represent_none)
+
+        class Emitter(self.Emitter):
+            def choose_scalar_style(self):
+                style = super().choose_scalar_style()
+                if style == "'" and '"' not in self.event.value:
+                    style = '"'
+                return style
+
+        self.Emitter = Emitter
 
 
 def load(stream):

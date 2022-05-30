@@ -2,7 +2,7 @@ key-order:
   b: x
   c: x
   a: x
-quoted-string: 'True'
+quoted-string: "True"
 a-list:
 - 3
 - 2
