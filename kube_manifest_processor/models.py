@@ -8,6 +8,7 @@ def decorate_object(obj):
     else:
         group, version = group_version.split('/', maxsplit=1)
         obj._gvk = GroupVersionKind(group, version, obj['kind'])
+    return obj
 
 
 @dataclass(frozen=True)

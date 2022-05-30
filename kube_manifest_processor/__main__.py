@@ -49,7 +49,7 @@ def main():
     #     return arg_parser.error('Invalid FILTER format')
 
     def process_object(obj):
-        decorate_object(obj)
+        obj = decorate_object(obj)
         for f in filters:
             obj = f.process(obj)
             if obj is None:
