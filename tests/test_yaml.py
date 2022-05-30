@@ -1,4 +1,5 @@
 import os
+from textwrap import dedent
 
 from kube_manifest_processor import yaml
 
@@ -17,9 +18,9 @@ def test_roundtrip():
 def test_multiline():
     assert yaml.dumps({
         'key': 'line1\nline2\nline3\n',
-    }) == """
+    }) == dedent("""\
     key: |
       line1
       line2
       line3
-    """
+    """)
