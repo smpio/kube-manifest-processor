@@ -5,7 +5,7 @@ import collections
 
 from .base import Filter
 from ..models import GroupVersionKind
-from ..yaml import YAML
+from .. import yaml
 
 
 class RemoveNamespace(Filter, name='remove_namespace'):
@@ -38,7 +38,7 @@ class External(Filter, name='external'):
     def process(self, obj):
         if self.format == 'yaml':
             fp = io.BytesIO()
-            YAML().dump(obj, fp)
+            yaml.dump(obj, fp)
             marshalled = fp.getvalue()
         elif self.format == 'json':
             marshalled = json.dumps(obj).encode()
@@ -46,7 +46,7 @@ class External(Filter, name='external'):
             raise Exception(f'Invalid format: {self.format}')
 
         result = subprocess.run(self.command, shell=True, input=marshalled, capture_output=True, check=True)
-        return YAML().load(result.stdout)
+        return yaml.load(result.stdout)
 
 
 class RemovePrefix(Filter, name='remove_prefix'):
@@ -69,7 +69,7 @@ class RemovePrefix(Filter, name='remove_prefix'):
 class Drop(Filter, name='drop'):
     def __init__(self, group_kind, **filters):
         self.group, self.kind = group_kind.split('/')
-        self.filters = {tuple(k.split('/')): YAML().load(v) for k, v in filters.items()}
+        self.filters = {tuple(k.split('/')): yaml.load(v) for k, v in filters.items()}
 
     def process(self, obj):
         if self.group != obj._gvk.group:

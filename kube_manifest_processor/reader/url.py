@@ -1,7 +1,7 @@
 import requests
 from ruamel.yaml.comments import CommentedMap
 
-from ..yaml import YAML
+from .. import yaml
 
 
 class URLReader:
@@ -15,7 +15,7 @@ class URLReader:
         if ctype == 'application/json':
             yield resp.json(object_pairs_hook=CommentedMap)
         else:
-            yield from exclude_empty_documents(YAML().load_all(resp.text))
+            yield from exclude_empty_documents(yaml.load_all(resp.text))
 
 
 def exclude_empty_documents(docs):

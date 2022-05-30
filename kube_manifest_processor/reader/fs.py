@@ -1,6 +1,6 @@
 import os
 
-from ..yaml import YAML
+from .. import yaml
 
 
 class DirReader:
@@ -24,7 +24,7 @@ class StreamReader:
 
 
 def read_fp(fp):
-    return exclude_empty_documents(YAML().load_all(fp))
+    return exclude_empty_documents(yaml.load_all(fp))
 
 
 def exclude_empty_documents(docs):

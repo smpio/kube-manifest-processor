@@ -1,7 +1,7 @@
 import logging
 import argparse
 
-from .yaml import YAML
+from . import yaml
 from .reader import get_reader
 from .models import decorate_object
 from .writer import FileWriter, DirWriter
@@ -83,7 +83,7 @@ def parse_smart_kwargs(parts):
     kwargs = {}
     for part in parts:
         k, v = part.split('=', maxsplit=1)
-        kwargs[k] = YAML().load(v)
+        kwargs[k] = yaml.load(v)
     return kwargs
 
 
