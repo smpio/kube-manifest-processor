@@ -14,11 +14,20 @@ class ApiServerReader:
             qsl = [(k, v) for k, v in qsl if k != 'namespace']
             url_parts = url_parts._replace(query=urllib.parse.urlencode(qsl))
             url = urllib.parse.urlunparse(url_parts)
+
         self.session = requests.Session()
-        self.session.headers = {
-            'Accept': 'application/json',
-        }
+        self.session.headers['Accept'] = 'application/json'
         self.base_url = url
+
+        if url_parts.hostname in (
+                'kubernetes',
+                'kubernetes.default',
+                'kubernetes.default.svc',
+                'kubernetes.default.svc.cluster.local',
+        ):
+            with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as fp:
+                self.session.headers['Authorization'] = 'Bearer ' + fp.read()
+            self.session.verify = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
 
     def __iter__(self):
         for resource in self.discover():
