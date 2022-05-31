@@ -38,6 +38,12 @@ class RemoveServiceAccountSecrets(Filter, name='remove_sa_secrets'):
         return obj
 
 
+class RemoveManagedFields(Filter, name='remove_managed_fields'):
+    def process(self, obj):
+        obj.get('metadata', {}).pop('managedFields', None)
+        return obj
+
+
 class External(Filter, name='external'):
     def __init__(self, command, format='yaml'):
         self.command = command
