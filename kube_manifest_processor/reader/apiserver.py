@@ -20,7 +20,6 @@ class ApiServerReader:
         self.base_url = url
 
         if url_parts.hostname in (
-                'kubernetes',
                 'kubernetes.default',
                 'kubernetes.default.svc',
                 'kubernetes.default.svc.cluster.local',
