@@ -78,7 +78,7 @@ class Clean(Filter, name='clean'):
                 if not subdef:
                     continue
                 try:
-                    if subdef['read_only']:
+                    if subdef['read_only'] and k != 'readOnly':
                         raise _Drop()
                     self._clean(v, subdef)
                     if v == {} and k not in d.get('required', ()):
