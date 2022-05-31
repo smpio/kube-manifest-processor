@@ -5,6 +5,8 @@ import ruamel.yaml.scalarstring
 
 # see https://github.com/kubernetes/kubernetes/issues/34146#issuecomment-680825790
 
+BOOL_SCALARS = set('y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF'.split('|'))
+
 
 def my_represent_none(self, data):
     return self.represent_scalar('tag:yaml.org,2002:null', 'null')
@@ -22,6 +24,9 @@ class YAML(ruamel.yaml.YAML):
             def choose_scalar_style(self):
                 style = super().choose_scalar_style()
                 if style == "'" and '"' not in self.event.value:
+                    style = '"'
+                if self.event.tag == 'tag:yaml.org,2002:str' and self.event.value in BOOL_SCALARS:
+                    # we are working in YAML 1.2, but Kubernetes still interprets yes/no as bools
                     style = '"'
                 return style
 
