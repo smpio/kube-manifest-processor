@@ -1,0 +1,10 @@
+[project]
+name = "kube-manifest-processor"
+version = "1.0.0"
+dependencies = [
+    "ruamel.yaml",
+    "requests",
+]
+
+[project.scripts]
+kube-manifest-processor = "kube_manifest_processor.__main__:main"
