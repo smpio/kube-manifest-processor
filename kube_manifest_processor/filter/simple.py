@@ -129,7 +129,6 @@ class CleanService(Filter, name='clean_service'):
         spec = obj.get('spec', {})
         spec.pop('clusterIP', None)
         spec.pop('clusterIPs', None)
-        spec.pop('loadBalancerIP', None)
         spec.pop('healthCheckNodePort', None)
         for port in spec.get('ports', []):
             port.pop('nodePort', None)
