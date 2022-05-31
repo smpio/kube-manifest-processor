@@ -44,6 +44,12 @@ class RemoveManagedFields(Filter, name='remove_managed_fields'):
         return obj
 
 
+class RemoveLastAppliedConf(Filter, name='remove_last_applied_conf'):
+    def process(self, obj):
+        obj.get('metadata', {}).get('annotations', {}).pop('kubectl.kubernetes.io/last-applied-configuration', None)
+        return obj
+
+
 class External(Filter, name='external'):
     def __init__(self, command, format='yaml'):
         self.command = command
