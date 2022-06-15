@@ -101,7 +101,6 @@ def decorate_schema(schema):
         if 'x-kubernetes-group-version-kind' in d:
             d.get('properties', {}).get('status', {})['read_only'] = True
 
-    # TODO: does not work!
     schema['definitions']['io.k8s.api.apps.v1.DeploymentStrategy']['default'] = {
         'type': 'RollingUpdate',
         'rollingUpdate': {
@@ -113,7 +112,8 @@ def decorate_schema(schema):
     schema['definitions']['io.k8s.api.apps.v1.DaemonSetUpdateStrategy']['default'] = {
         'type': 'RollingUpdate',
         'rollingUpdate': {
-            'maxUnavailable': 1,
+            'maxUnavailable': '100%',
+            'maxSurge': 0,
         },
     }
 
