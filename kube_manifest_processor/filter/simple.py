@@ -16,42 +16,6 @@ class RemoveNamespace(Filter, name='remove_namespace'):
         return obj
 
 
-class RemoveTillerLabels(Filter, name='remove_tiller_labels'):
-    def process(self, obj):
-        metadata = obj['metadata']
-        label_maps = [
-            metadata.get('labels'),
-            obj.get('spec', {}).get('template', {}).get('metadata', {}).get('labels'),
-            obj.get('spec', {}).get('selector', {}),
-        ]
-        for labels in label_maps:
-            if labels:
-                labels.pop('chart', None)
-                labels.pop('release', None)
-                labels.pop('heritage', None)
-        return obj
-
-
-class RemoveServiceAccountSecrets(Filter, name='remove_sa_secrets'):
-    def process(self, obj):
-        if obj._gvk != GroupVersionKind('', 'v1', 'ServiceAccount'):
-            return obj
-        obj.pop('secrets', None)
-        return obj
-
-
-class RemoveManagedFields(Filter, name='remove_managed_fields'):
-    def process(self, obj):
-        obj.get('metadata', {}).pop('managedFields', None)
-        return obj
-
-
-class RemoveLastAppliedConf(Filter, name='remove_last_applied_conf'):
-    def process(self, obj):
-        obj.get('metadata', {}).get('annotations', {}).pop('kubectl.kubernetes.io/last-applied-configuration', None)
-        return obj
-
-
 class External(Filter, name='external'):
     def __init__(self, command, format='yaml'):
         self.command = command
