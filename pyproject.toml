@@ -6,5 +6,10 @@ dependencies = [
     "requests",
 ]
 
+[project.optional-dependencies]
+tests = [
+    "pytest",
+]
+
 [project.scripts]
 kube-manifest-processor = "kube_manifest_processor.__main__:main"
