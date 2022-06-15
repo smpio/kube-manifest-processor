@@ -111,6 +111,30 @@ class Drop(Filter, name='drop'):
         return None
 
 
+class Remove(Filter, name='remove'):
+    def __init__(self, group_kind, *, path):
+        group_glob, kind_glob = group_kind.split('/')
+        self.group_re = re.compile(fnmatch.translate(group_glob))
+        self.kind_re = re.compile(fnmatch.translate(kind_glob))
+        self.path = path.split('/')
+
+    def process(self, obj):
+        if not self.group_re.match(obj._gvk.group):
+            return obj
+        if not self.kind_re.match(obj._gvk.kind):
+            return obj
+        subobj = obj
+        for path_part in self.path[:-1]:
+            if not isinstance(subobj, dict):
+                return obj
+            subobj = subobj.get(path_part)
+            if not subobj:
+                return obj
+        last_part = self.path[-1]
+        subobj.pop(last_part, None)
+        return obj
+
+
 class CleanPVC(Filter, name='clean_pvc'):
     def process(self, obj):
         if obj._gvk != GroupVersionKind('', 'v1', 'PersistentVolumeClaim'):
