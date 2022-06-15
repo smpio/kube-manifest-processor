@@ -1,3 +1,3 @@
 registry = {}
-from . import simple
-from . import clean
+from . import simple  # noqa
+from . import clean  # noqa
