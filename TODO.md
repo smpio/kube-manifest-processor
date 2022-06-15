@@ -1,4 +1,3 @@
-* github: run tests, add dev dependencies
 * add remove filter
 * add glob for remove and drop
 * for some reason arguments should be separated by --

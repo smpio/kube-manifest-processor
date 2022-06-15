@@ -8,5 +8,8 @@ on:
     branches: [ master ]
 
 jobs:
+  test:
+    uses: ./.github/workflows/python-app.yml
   build:
+    needs: test
     uses: smpio/github-workflows/.github/workflows/docker.yaml@master
