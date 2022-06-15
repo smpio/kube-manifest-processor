@@ -1,5 +1,7 @@
 import io
+import re
 import json
+import fnmatch
 import subprocess
 import collections
 
@@ -88,13 +90,15 @@ class RemovePrefix(Filter, name='remove_prefix'):
 
 class Drop(Filter, name='drop'):
     def __init__(self, group_kind, **filters):
-        self.group, self.kind = group_kind.split('/')
+        group_glob, kind_glob = group_kind.split('/')
+        self.group_re = re.compile(fnmatch.translate(group_glob))
+        self.kind_re = re.compile(fnmatch.translate(kind_glob))
         self.filters = {tuple(k.split('/')): yaml.load(v) for k, v in filters.items()}
 
     def process(self, obj):
-        if self.group != obj._gvk.group:
+        if not self.group_re.match(obj._gvk.group):
             return obj
-        if self.kind != obj._gvk.kind:
+        if not self.kind_re.match(obj._gvk.kind):
             return obj
         for k, v in self.filters.items():
             subdata = obj
