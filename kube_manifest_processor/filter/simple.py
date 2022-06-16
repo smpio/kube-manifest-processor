@@ -9,6 +9,8 @@ from .base import Filter
 from ..models import GroupVersionKind
 from .. import yaml
 
+slash_split_re = re.compile(r'(?<!\\)/')
+
 
 class RemoveNamespace(Filter, name='remove_namespace'):
     def process(self, obj):
@@ -57,7 +59,7 @@ class Drop(Filter, name='drop'):
         group_glob, kind_glob = group_kind.split('/')
         self.group_re = re.compile(fnmatch.translate(group_glob))
         self.kind_re = re.compile(fnmatch.translate(kind_glob))
-        self.filters = {tuple(k.split('/')): yaml.load(v) for k, v in filters.items()}
+        self.filters = {tuple(slash_split_re.split(k)): yaml.load(v) for k, v in filters.items()}
 
     def process(self, obj):
         if not self.group_re.match(obj._gvk.group):
@@ -80,7 +82,7 @@ class Remove(Filter, name='remove'):
         group_glob, kind_glob = group_kind.split('/')
         self.group_re = re.compile(fnmatch.translate(group_glob))
         self.kind_re = re.compile(fnmatch.translate(kind_glob))
-        self.path = path.split('/')
+        self.path = slash_split_re.split(path)
 
     def process(self, obj):
         if not self.group_re.match(obj._gvk.group):
