@@ -59,7 +59,7 @@ class Drop(Filter, name='drop'):
         group_glob, kind_glob = group_kind.split('/')
         self.group_re = re.compile(fnmatch.translate(group_glob))
         self.kind_re = re.compile(fnmatch.translate(kind_glob))
-        self.filters = {tuple(slash_split_re.split(k)): yaml.load(v) for k, v in filters.items()}
+        self.filters = {tuple(split_slashes(k)): yaml.load(v) for k, v in filters.items()}
 
     def process(self, obj):
         if not self.group_re.match(obj._gvk.group):
@@ -82,7 +82,7 @@ class Remove(Filter, name='remove'):
         group_glob, kind_glob = group_kind.split('/')
         self.group_re = re.compile(fnmatch.translate(group_glob))
         self.kind_re = re.compile(fnmatch.translate(kind_glob))
-        self.path = slash_split_re.split(path)
+        self.path = split_slashes(path)
 
     def process(self, obj):
         if not self.group_re.match(obj._gvk.group):
@@ -134,3 +134,7 @@ class DropOwned(Filter, name='drop_owned'):
         if 'ownerReferences' in obj.get('metadata', {}):
             return None
         return obj
+
+
+def split_slashes(s: str):
+    return [r.replace('\\/', '/') for r in slash_split_re.split(s)]
