@@ -6,7 +6,7 @@ import subprocess
 import collections
 
 from .base import Filter
-from ..models import GroupVersionKind
+from ..models import GroupVersionKind, decorate_object
 from .. import yaml
 
 slash_split_re = re.compile(r'(?<!\\)/')
@@ -33,8 +33,11 @@ class External(Filter, name='external'):
         else:
             raise Exception(f'Invalid format: {self.format}')
 
-        result = subprocess.run(self.command, shell=True, input=marshalled, capture_output=True, check=True)
-        return yaml.load(result.stdout)
+        p = subprocess.Popen(self.command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        outs, errs = p.communicate(marshalled)
+        if p.returncode != 0:
+            raise Exception(f'Command `{self.command}` returned non-zero exit code {p.returncode}')
+        return decorate_object(yaml.load(outs))
 
 
 class RemovePrefix(Filter, name='remove_prefix'):
