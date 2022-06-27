@@ -18,6 +18,7 @@ class RemoveNamespace(Filter, name='remove_namespace'):
         return obj
 
 
+# TODO: add group/kind selector
 class External(Filter, name='external'):
     def __init__(self, command, format='yaml'):
         self.command = command
