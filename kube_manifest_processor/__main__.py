@@ -1,8 +1,11 @@
 import logging
 import argparse
+from pathlib import Path
+
+from ruamel.yaml import YAMLError
 
 from . import yaml
-from .reader import get_reader
+from .reader import DirReader, get_reader
 from .models import decorate_object
 from .writer import FileWriter, DirWriter
 from .filter import registry as filters_registry
@@ -40,13 +43,15 @@ def main():
 
     try:
         writer = parse_smart_arg(args.output, output_types, FileWriter)
-    except Exception:
-        return arg_parser.error('Invalid OUTPUT format')
+    except (KeyError, TypeError, ValueError) as error:
+        arg_parser.error(f'Invalid OUTPUT format: {error}')
 
-    # try:
-    filters = [parse_smart_arg(f, filters_registry) for f in args.filter]
-    # except Exception:
-    #     return arg_parser.error('Invalid FILTER format')
+    filters = []
+    for spec in args.filter:
+        try:
+            filters.append(parse_smart_arg(spec, filters_registry))
+        except (KeyError, TypeError, ValueError, OSError, YAMLError) as error:
+            arg_parser.error(f'Invalid filter {spec!r}: {error}')
 
     def process_object(obj):
         obj = decorate_object(obj)
@@ -56,10 +61,19 @@ def main():
                 return
         writer.write(obj)
 
-    for input in args.inputs:
-        reader = get_reader(input)
-        for obj in reader:
-            process_object(obj)
+    try:
+        with writer.open():
+            for input in args.inputs:
+                reader = get_reader(input)
+                if isinstance(reader, DirReader):
+                    source = Path(reader.root).resolve()
+                    destination = writer.path.resolve()
+                    if destination.is_relative_to(source) or source.is_relative_to(destination):
+                        raise ValueError('Directory inputs and outputs must not overlap')
+                for obj in reader:
+                    process_object(obj)
+    except (OSError, ValueError, YAMLError) as error:
+        arg_parser.exit(1, f'{arg_parser.prog}: {error}\n')
 
 
 def parse_smart_arg(arg, class_map, default_class=None):

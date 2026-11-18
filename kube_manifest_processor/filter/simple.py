@@ -3,7 +3,7 @@ import re
 import json
 import fnmatch
 import subprocess
-import collections
+from collections.abc import MutableMapping
 
 from .base import Filter
 from ..models import GroupVersionKind, decorate_object
@@ -46,7 +46,7 @@ class RemovePrefix(Filter, name='remove_prefix'):
         self.prefix = prefix
 
     def process(self, obj):
-        if isinstance(obj, collections.MutableMapping):
+        if isinstance(obj, MutableMapping):
             for k, v in obj.items():
                 if k == 'name' and isinstance(v, str):
                     obj[k] = obj[k].removeprefix(self.prefix)
@@ -63,7 +63,7 @@ class Drop(Filter, name='drop'):
         group_glob, kind_glob = group_kind.split('/')
         self.group_re = re.compile(fnmatch.translate(group_glob))
         self.kind_re = re.compile(fnmatch.translate(kind_glob))
-        self.filters = {tuple(split_slashes(k)): yaml.load(v) for k, v in filters.items()}
+        self.filters = {tuple(split_slashes(k)): v for k, v in filters.items()}
 
     def process(self, obj):
         if not self.group_re.match(obj._gvk.group):
@@ -73,9 +73,9 @@ class Drop(Filter, name='drop'):
         for k, v in self.filters.items():
             subdata = obj
             for kpart in k:
-                if subdata is None:
+                if not isinstance(subdata, MutableMapping) or kpart not in subdata:
                     return obj
-                subdata = subdata.get(kpart)
+                subdata = subdata[kpart]
             if subdata != v:
                 return obj
         return None
@@ -86,7 +86,8 @@ class Remove(Filter, name='remove'):
         group_glob, kind_glob = group_kind.split('/')
         self.group_re = re.compile(fnmatch.translate(group_glob))
         self.kind_re = re.compile(fnmatch.translate(kind_glob))
-        self.path = split_slashes(path)
+        self.path = path
+        self.keys = split_slashes(path)
 
     def process(self, obj):
         if not self.group_re.match(obj._gvk.group):
@@ -94,15 +95,19 @@ class Remove(Filter, name='remove'):
         if not self.kind_re.match(obj._gvk.kind):
             return obj
         subobj = obj
-        for path_part in self.path[:-1]:
-            if not isinstance(subobj, dict):
+        for key in self.keys[:-1]:
+            self.require_mapping(subobj)
+            subobj = subobj.get(key)
+            if subobj is None:
                 return obj
-            subobj = subobj.get(path_part)
-            if not subobj:
-                return obj
-        last_part = self.path[-1]
-        subobj.pop(last_part, None)
+        self.require_mapping(subobj)
+        subobj.pop(self.keys[-1], None)
         return obj
+
+    def require_mapping(self, value):
+        if not isinstance(value, MutableMapping):
+            value_kind = 'a sequence' if isinstance(value, list) else 'a scalar'
+            raise ValueError(f'Remove path {self.path!r} requires mapping keys (found {value_kind})')
 
 
 class CleanPVC(Filter, name='clean_pvc'):

@@ -21,11 +21,14 @@ kube-manifest-processor \
 ```
 
 Inspect the generated manifests after a successful run before replacing any
-existing output. The processor opens the output before reading inputs or
-validating filters. File output truncates the destination, and `dir:PATH`
-recursively removes an existing destination directory, even if processing
-subsequently fails. Keep inputs outside the output and put the staged output
-outside any directory passed as an input.
+existing output that you maintain by hand. The processor stages regular file
+and directory output next to the destination. It replaces the destination only
+after all inputs and filters succeed. A successful `dir:PATH` run replaces
+the entire tree, including removing it if no resources were selected.
+Keep directory inputs and outputs separate. Devices and pipes receive output
+directly. When the input is a pipeline, the processor sees the bytes it
+receives. If an upstream command can fail after producing valid YAML, render
+to a temporary file and check that command's exit status before processing it.
 
 With `dir:PATH:by_namespace=false`, two resources of the same API group,
 kind, and name in different namespaces map to the same file. The later
@@ -35,6 +38,12 @@ resources must remain distinct.
 Use `-f remove_namespace` to remove `metadata.namespace`. The legacy
 `--remove-namespace` and `--remove-tiller-labels` options in `--help` are
 accepted but have no effect.
+
+The values in `drop` predicates are parsed as YAML, so
+`-f 'drop:apps/Deployment:spec/replicas=2'` matches the integer `2`. Use
+YAML quotes inside the filter argument to match a string such as `"2"`.
+`remove` paths address mapping keys. Traversing a scalar or a sequence
+raises an error.
 
 
 ## Choosing YAML formatter
